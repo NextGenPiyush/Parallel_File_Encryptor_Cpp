@@ -2,14 +2,34 @@
   "version": "0.2.0",
   "configurations": [
     {
+      "name": "Debug encrypt_decrypt",
+      "type": "gdb",
+      "request": "launch",
+      "program": "${workspaceFolder}/encrypt_decrypt",
+      "args": [],
+      "cwd": "${workspaceFolder}",
+      "preLaunchTask": "build"
+    },
+    {
+      "name": "Debug cryption (standalone)",
+      "type": "gdb",
+      "request": "launch",
+      "program": "${workspaceFolder}/cryption",
+      "args": [
+        "your_task_data_here"
+      ],
+      "cwd": "${workspaceFolder}",
+      "preLaunchTask": "build"
+    },
+    {
       "name": "C/C++ Runner: Debug Session",
       "type": "cppdbg",
       "request": "launch",
       "args": [],
       "stopAtEntry": false,
       "externalConsole": true,
-      "cwd": ".",
-      "program": "build/Debug/outDebug",
+      "cwd": "c:/Users/Piyush Goyal/OneDrive/Desktop/Parallel File Encryptor",
+      "program": "c:/Users/Piyush Goyal/OneDrive/Desktop/Parallel File Encryptor/build/Debug/outDebug",
       "MIMode": "gdb",
       "miDebuggerPath": "gdb",
       "setupCommands": [

@@ -1,3 +1,4 @@
+// Task.hpp
 #ifndef TASK_HPP
 #define TASK_HPP
 
@@ -6,40 +7,42 @@
 #include <string>
 #include <sstream>
 
-using namespace std;
-
-enum class Action{
+enum class Action {
     ENCRYPT,
     DECRYPT
 };
 
-struct Task{
-    string filePath;
-    fstream f_stream;
+struct Task {
+    std::string filePath;
+    std::fstream f_stream;
     Action action;
 
-    Task(fstream&& stream, Action act, string filePath) : f_stream(move(stream)), action(act), filePath(filePath) {}  // constructor
+    Task(std::fstream&& stream, Action act, std::string filePath)
+        : filePath(filePath), f_stream(std::move(stream)), action(act) {}
 
-    string toString() const{
-        ostringstream oss;
+    std::string toString() const {
+        std::ostringstream oss;
         oss << filePath << "," << (action == Action::ENCRYPT ? "ENCRYPT" : "DECRYPT");
         return oss.str();
     }
 
-    static Task fromString(const string& taskData){
-        istringstream iss(taskData);
-        string filePath;
-        string actionStr;
+    static Task fromString(const std::string& taskData) {
+        std::istringstream iss(taskData);
+        std::string filePath;
+        std::string actionStr;
 
-        if(getline(iss, filePath, ',') && getline(iss, actionStr)){
+        if (std::getline(iss, filePath, ',') && std::getline(iss, actionStr)) {
             Action action = (actionStr == "ENCRYPT") ? Action::ENCRYPT : Action::DECRYPT;
             IO io(filePath);
-            fstream f_stream = move(io.getFileStream());
-            
-            if(f_stream.is_open()) return Task(move(f_stream), action, filePath); 
-            else throw runtime_error("Failed to open file: " + filePath);
-        } 
-        else throw std::runtime_error("Invalid task data format");
+            std::fstream f_stream = io.getFileStream();
+            if (f_stream.is_open()) {
+                return Task(std::move(f_stream), action, filePath);
+            } else {
+                throw std::runtime_error("Failed to open file: " + filePath);
+            }
+        } else {
+            throw std::runtime_error("Invalid task data format");
+        }
     }
 };
 

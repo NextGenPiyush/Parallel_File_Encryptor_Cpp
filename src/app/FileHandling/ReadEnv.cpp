@@ -4,19 +4,15 @@
 #include <fstream>
 #include <sstream>
 
-using namespace std;
-
 class ReadEnv{
     public:
-        string getenv(){
-            string env_path = ".env";
+        std::string getenv(){
+            std::string env_path = ".env";
             IO io(env_path);
-
-            fstream f_stream = io.getFileStream();
-            stringstream buffer;
+            std::fstream f_stream = io.getFileStream();
+            std::stringstream buffer;
             buffer << f_stream.rdbuf();
-
-            string content = buffer.str();
+            std::string content = buffer.str();
             return content;
         }    
 };

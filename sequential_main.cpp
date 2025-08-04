@@ -1,17 +1,17 @@
 #include <iostream>
 #include <filesystem>
-#include "./src/app/processes/ProcessManagement.hpp"
-#include "./src/app/processes/Task.hpp"
-#include <ctime>
-#include <sys/wait.h>
-#include <iomanip>
 #include <chrono>
+#include <iomanip>
+#include <fstream>
+#include "./src/app/fileHandling/IO.hpp"
+#include "./src/app/fileHandling/ReadEnv.cpp"
+#include "./src/app/processes/Task.hpp"
+#include "./src/app/encryptDecrypt/Cryption.hpp"
 
 namespace fs = std::filesystem;
 
-int main(int argc, char* argv[]) {
-    std::string directory;
-    std::string action;
+int main(int argc, char* argv[]){
+    std::string directory, action;
 
     if (argc >= 3) {
         directory = argv[1];
@@ -29,13 +29,11 @@ int main(int argc, char* argv[]) {
     auto start_time = std::chrono::high_resolution_clock::now();
     auto t = std::time(nullptr);
     auto tm = *std::localtime(&t);
-    std::cout << "\n\033[1;34m🔐 Starting the encryption/decryption at: " << std::put_time(&tm, "%Y-%m-%d %H:%M:%S") << "\033[0m\n\n";
-
+    std::cout << "\n🔐 \033[1;34mStarting SEQUENTIAL encryption/decryption at: " 
+              << std::put_time(&tm, "%Y-%m-%d %H:%M:%S") << "\033[0m\n\n";
 
     try {
         if (fs::exists(directory) && fs::is_directory(directory)) {
-            ProcessManagement processManagement;
-
             for (const auto& entry : fs::recursive_directory_iterator(directory)) {
                 if (entry.is_regular_file()) {
                     std::string filePath = entry.path().string();
@@ -44,32 +42,27 @@ int main(int argc, char* argv[]) {
 
                     if (f_stream.is_open()) {
                         Action taskAction = (action == "encrypt") ? Action::ENCRYPT : Action::DECRYPT;
-                        auto task = std::make_unique<Task>(std::move(f_stream), taskAction, filePath);
-                        
-                            std::time_t t = std::time(nullptr);
-                            std::tm* now = std::localtime(&t);
-                            std::cout << "Starting the encryption/decryption at: " << std::put_time(now, "%Y-%m-%d %H:%M:%S") << std::endl;
+                        Task task(std::move(f_stream), taskAction, filePath);
 
-                            processManagement.submitToQueue(std::move(task)); 
-
-                    } 
-                    else std::cout << "Unable to open file: " << filePath << std::endl;
+                        std::cout << "📄 Processing: " << filePath << " ... ";
+                        executeCryption(task.toString());
+                        std::cout << "\033[1;32mDone.\033[0m\n";
+                    } else {
+                        std::cout << "\033[1;31mFailed to open file:\033[0m " << filePath << "\n";
+                    }
                 }
             }
-        } 
-        else std::cout << "Invalid directory path!" << std::endl;
-    } 
-    catch (const fs::filesystem_error& ex) {
-        std::cout << "Filesystem error: " << ex.what() << std::endl;
+        } else {
+            std::cout << "\033[1;31mInvalid directory path!\033[0m\n";
+        }
+    } catch (const fs::filesystem_error& ex) {
+        std::cout << "\033[1;31mFilesystem error: \033[0m" << ex.what() << "\n";
     }
-
-    int status;
-    while (wait(&status) > 0);
 
     auto end_time = std::chrono::high_resolution_clock::now();
     std::chrono::duration<double> elapsed = end_time - start_time;
 
-    std::cout << "\n\033[1;32m✅ All files processed successfully.\033[0m\n";
+    std::cout << "\n\033[1;32m✅ All files processed sequentially.\033[0m\n";
     std::cout << "⏱️ Total time taken: " << elapsed.count() << " seconds\n";
 
     return 0;
